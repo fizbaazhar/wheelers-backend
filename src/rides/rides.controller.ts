@@ -17,6 +17,7 @@ import { UsersService } from '../users/users.service';
 import { VehicleDetailsService } from '../vehicle-details/vehicle-details.service';
 import { VehicleDetails } from '../models/vehicle-details.schema';
 import { Ride } from '../websockets/schemas/ride.schema';
+import { ChatService } from '../chat/chat.service';
 import { randomUUID } from 'crypto';
 
 @Controller('rides')
@@ -28,6 +29,7 @@ export class RidesController {
     private readonly websocketsGateway: WebsocketsGateway,
     private readonly usersService: UsersService,
     private readonly vehicleDetailsService: VehicleDetailsService,
+    private readonly chatService: ChatService,
     @InjectModel(Ride.name) private rideModel: Model<Ride>,
   ) {}
 
@@ -349,6 +351,28 @@ export class RidesController {
       const savedRide = await newRide.save();
       
       this.logger.log(`User ${userId} accepted bid from driver ${acceptBidDto.driverId} for ride ${savedRide._id}`);
+
+      // Auto-create chat thread for this ride
+      try {
+        // Check if thread already exists for this ride request
+        const existingThread = await this.chatService.getThreadByRideRequest(acceptBidDto.rideRequestId);
+        
+        if (!existingThread) {
+          // Create a new chat thread
+          await this.chatService.createThread({
+            rideRequestId: acceptBidDto.rideRequestId,
+            userId: userId,
+            driverId: acceptBidDto.driverId,
+            initialMessage: undefined, // No initial message, thread is created for future communication
+          });
+          this.logger.log(`Auto-created chat thread for ride request ${acceptBidDto.rideRequestId}`);
+        } else {
+          this.logger.log(`Chat thread already exists for ride request ${acceptBidDto.rideRequestId}`);
+        }
+      } catch (error) {
+        // Log error but don't fail the ride acceptance if thread creation fails
+        this.logger.error(`Failed to create chat thread for ride ${acceptBidDto.rideRequestId}:`, error);
+      }
 
       // Emit WebSocket events
       // Notify the driver that their bid was accepted
