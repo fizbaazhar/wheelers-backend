@@ -12,8 +12,6 @@ build/
 *.tsbuildinfo
 
 # Environment variables
-.env
-.env.local
 .env.development.local
 .env.test.local
 .env.production.local
@@ -29,7 +27,6 @@ logs/
 *.log
 
 # IDE - VSCode
-.vscode/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
@@ -112,3 +109,4 @@ storybook-static
 tmp/
 temp/
 
+config.bat

@@ -7,6 +7,7 @@ import { UsersModule } from '../users/users.module';
 import { VehicleDetailsModule } from '../vehicle-details/vehicle-details.module';
 import { Ride, RideSchema } from '../websockets/schemas/ride.schema';
 import { AuthModule } from '../auth/auth.module';
+import { ChatModule } from '../chat/chat.module';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
@@ -14,6 +15,7 @@ import { JwtModule } from '@nestjs/jwt';
     WebsocketsModule, 
     UsersModule,
     VehicleDetailsModule,
+    ChatModule,
     forwardRef(() => AuthModule),
     JwtModule.register({
       secretOrPrivateKey: process.env.JWT_SECRET,
